@@ -1,5 +1,6 @@
 <?php
 ob_clean();
+ob_start(); 
 session_start();
 
 // Check if user is logged in
@@ -21,7 +22,7 @@ try {
     // Get user's todo lists
     $user_id = $_SESSION['user_id'];
     $stmt = $pdo->prepare("
-        SELECT id, title, description, status, priority, created_at 
+        SELECT id, title, description, status, priority, created_at, due_date  -- Tambahkan due_date di sini
         FROM todo_lists 
         WHERE user_id = ? 
         ORDER BY created_at DESC
@@ -56,27 +57,39 @@ try {
     $error_message = "An error occurred while loading your todo lists. Please try again later.";
 }
 
+
+
 // Helper functions for priority colors
 function getPriorityColor($priority) {
     $priority = strtolower(trim($priority ?? 'low'));
-    return match($priority) {
-        'high' => 'bg-red-700',
-        'medium' => 'bg-yellow-600',
-        'low' => 'bg-green-700',
-        default => 'bg-gray-700'
-    };
+    switch ($priority) {
+        case 'high':
+            return 'bg-red-700';
+        case 'medium':
+            return 'bg-yellow-600';
+        case 'low':
+            return 'bg-green-700';
+        default:
+            return 'bg-gray-700';
+    }
 }
+
 
 function getPriorityBadgeColor($priority) {
     $priority = strtolower(trim($priority ?? 'low'));
-    return match($priority) {
-        'high' => 'bg-red-800',
-        'medium' => 'bg-yellow-700',
-        'low' => 'bg-green-800',
-        default => 'bg-gray-800'
-    };
+    switch ($priority) {
+        case 'high':
+            return 'bg-red-800';
+        case 'medium':
+            return 'bg-yellow-700';
+        case 'low':
+            return 'bg-green-800';
+        default:
+            return 'bg-gray-800';
+    }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -155,115 +168,146 @@ function getPriorityBadgeColor($priority) {
         </div>
 
         <!-- List To Do -->
-        <div class="flex space-x-4 overflow-x-auto pb-4">
-            <!-- To Do Column -->
-            <div class="flex-shrink-0 w-72">
-                <div class="bg-gray-800 rounded-md shadow">
-                    <div class="p-3">
-                        <h3 class="text-white font-semibold mb-2">To Do</h3>
-                        <?php foreach ($product_backlog as $item): ?>
-                            <div class="<?php echo getPriorityColor($item['priority']); ?> rounded mb-2 p-2 hover:opacity-90 cursor-pointer">
-                                <p class="text-white text-sm"><?php echo htmlspecialchars($item['title']); ?></p>
-                                <span class="inline-block text-xs text-white px-2 py-1 rounded mt-1 <?php echo getPriorityBadgeColor($item['priority']); ?>">
-                                    <?php echo ucfirst(strtolower(trim($item['priority'] ?? 'low'))); ?>
-                                </span>
-                                <div class="flex space-x-2 mt-2">
-                                    <a href="edit_todo.php?id=<?php echo $item['id']; ?>" 
-                                       class="text-blue-400 hover:text-blue-600">
-                                       <span class="bg-dark p-1 text-[xs] rounded-lg text-white material-symbols-outlined">
-                                            edit
-                                        </span>
-                                    </a>
-                                    <a href="delete_todo.php?id=<?php echo $item['id']; ?>" 
-                                       class="text-red-400 hover:text-red-600"
-                                       onclick="return confirm('Are you sure you want to delete this item?');">
-                                       <span class="bg-dark p-1 text-[xs] rounded-lg text-white material-symbols-outlined">
-                                            delete
-                                        </span>
-                                    </a>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                        <a href="new_todo.php?status=backlog" 
-                           class="block mt-2 text-gray-400 hover:text-white p-2 rounded hover:bg-gray-700 transition">
-                            + Add To Do
-                        </a>
-                    </div>
-                </div>
-            </div>
+<div class="flex space-x-4 overflow-x-auto pb-4">
+    <!-- To Do Column -->
+    <div class="flex-shrink-0 w-72">
+        <div class="bg-gray-800 rounded-md shadow">
+            <div class="p-3">
+                <h3 class="text-white font-semibold mb-2">To Do</h3>
+                <?php foreach ($product_backlog as $item): ?>
+                    <div class="<?php echo getPriorityColor($item['priority']); ?> rounded mb-2 p-2 hover:opacity-90 cursor-pointer">
+                        <p class="text-white font-bold text-sm"><?php echo htmlspecialchars($item['title']); 
+                            $current_date = date('Y-m-d');
+                        ?></p>
 
-            <!-- In Progress Column -->
-            <div class="flex-shrink-0 w-72">
-                <div class="bg-gray-800 rounded-md shadow">
-                    <div class="p-3">
-                        <h3 class="text-white font-semibold mb-2">In Progress</h3>
-                        <?php foreach ($in_progress as $item): ?>
-                            <div class="<?php echo getPriorityColor($item['priority']); ?> rounded mb-2 p-2 hover:opacity-90 cursor-pointer">
-                                <p class="text-white text-sm"><?php echo htmlspecialchars($item['title']); ?></p>
-                                <span class="inline-block text-xs text-white px-2 py-1 rounded mt-1 <?php echo getPriorityBadgeColor($item['priority']); ?>">
-                                    <?php echo ucfirst(strtolower(trim($item['priority'] ?? 'low'))); ?>
+           <!-- Menampilkan due date jika ada -->
+<p class="text-white font-bold text-xs">
+    Due: <?php echo isset($item['due_date']) ? htmlspecialchars($item['due_date']) : 'N/A'; ?>
+</p>
+<?php if (isset($item['due_date']) && $item['due_date'] < $current_date): ?>
+        <p class="text-red-500 text-xs font-bold">⚠️Due date has passed!!!⚠️</p>
+    <?php endif; ?>
+                        <span class="inline-block text-xs text-white px-2 py-1 rounded mt-1 <?php echo getPriorityBadgeColor($item['priority']); ?>">
+                            <?php echo ucfirst(strtolower(trim($item['priority'] ?? 'low'))); ?>
+                        </span>
+                        <div class="flex space-x-2 mt-2">
+                            <a href="edit_todo.php?id=<?php echo $item['id']; ?>" 
+                               class="text-blue-400 hover:text-blue-600">
+                               <span class="bg-dark p-1 text-[xs] rounded-lg text-white material-symbols-outlined">
+                                    edit
                                 </span>
-                                <div class="flex space-x-2 mt-2">
-                                    <a href="edit_todo.php?id=<?php echo $item['id']; ?>" 
-                                       class="text-blue-400 hover:text-blue-600">
-                                       <span class="bg-dark p-1 text-[xs] rounded-lg text-white material-symbols-outlined">
-                                            edit
-                                        </span>
-                                    </a>
-                                    <a href="delete_todo.php?id=<?php echo $item['id']; ?>" 
-                                       class="text-red-400 hover:text-red-600"
-                                       onclick="return confirm('Are you sure you want to delete this item?');">
-                                       <span class="bg-dark p-1 text-[xs] rounded-lg text-white material-symbols-outlined">
-                                            delete
-                                        </span>
-                                    </a>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                        <a href="new_todo.php?status=progress" 
-                           class="block mt-2 text-gray-400 hover:text-white p-2 rounded hover:bg-gray-700 transition">
-                            + Add To Do
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Done Column -->
-            <div class="flex-shrink-0 w-72">
-                <div class="bg-gray-800 rounded-md shadow">
-                    <div class="p-3">
-                        <h3 class="text-white font-semibold mb-2">Done</h3>
-                        <?php foreach ($done as $item): ?>
-                            <div class="<?php echo getPriorityColor($item['priority']); ?> rounded mb-2 p-2 hover:opacity-90 cursor-pointer">
-                                <p class="text-white text-sm"><?php echo htmlspecialchars($item['title']); ?></p>
-                                <span class="inline-block text-xs text-white px-2 py-1 rounded mt-1 <?php echo getPriorityBadgeColor($item['priority']); ?>">
-                                    <?php echo ucfirst(strtolower(trim($item['priority'] ?? 'low'))); ?>
+                            </a>
+                            <a href="delete_todo.php?id=<?php echo $item['id']; ?>" 
+                               class="text-red-400 hover:text-red-600"
+                               onclick="return confirm('Are you sure you want to delete this item?');">
+                               <span class="bg-dark p-1 text-[xs] rounded-lg text-white material-symbols-outlined">
+                                    delete
                                 </span>
-                                <div class="flex space-x-2 mt-2">
-                                    <a href="edit_todo.php?id=<?php echo $item['id']; ?>" 
-                                       class="text-blue-400 hover:text-blue-600">
-                                       <span class="bg-dark p-1 text-[xs] rounded-lg text-white material-symbols-outlined">
-                                            edit
-                                        </span>
-                                    </a>
-                                    <a href="delete_todo.php?id=<?php echo $item['id']; ?>" 
-                                       class="text-red-400 hover:text-red-600"
-                                       onclick="return confirm('Are you sure you want to delete this item?');">
-                                       <span class="bg-dark p-1 text-[xs] rounded-lg text-white material-symbols-outlined">
-                                            delete
-                                        </span>
-                                    </a>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                        <a href="new_todo.php?status=done" 
-                           class="block mt-2 text-gray-400 hover:text-white p-2 rounded hover:bg-gray-700 transition">
-                            + Add To Do
-                        </a>
+                            </a>
+                        </div>
                     </div>
-                </div>
+                <?php endforeach; ?>
+                <a href="new_todo.php?status=backlog" 
+                   class="block mt-2 text-gray-400 hover:text-white p-2 rounded hover:bg-gray-700 transition">
+                    + Add To Do
+                </a>
             </div>
         </div>
+    </div>
+
+    <!-- In Progress Column -->
+    <div class="flex-shrink-0 w-72">
+        <div class="bg-gray-800 rounded-md shadow">
+            <div class="p-3">
+                <h3 class="text-white font-semibold mb-2">In Progress</h3>
+                <?php foreach ($in_progress as $item): ?>
+                    <div class="<?php echo getPriorityColor($item['priority']); ?> rounded mb-2 p-2 hover:opacity-90 cursor-pointer">
+                        <p class="text-white font-bold text-sm"><?php echo htmlspecialchars($item['title']); 
+                            $current_date = date('Y-m-d');
+                        ?></p>
+
+    <!-- Menampilkan due date jika ada -->
+    <p class="text-white font-bold text-xs">
+    Due: <?php echo isset($item['due_date']) ? htmlspecialchars($item['due_date']) : 'N/A'; ?>
+    </p>
+    <?php if (isset($item['due_date']) && $item['due_date'] < $current_date): ?>
+        <p class="text-red-500 text-xs font-bold">⚠️Due date has passed!!!⚠️</p>
+    <?php endif; ?>
+                        <span class="inline-block text-xs text-white px-2 py-1 rounded mt-1 <?php echo getPriorityBadgeColor($item['priority']); ?>">
+                            <?php echo ucfirst(strtolower(trim($item['priority'] ?? 'low'))); ?>
+                        </span>
+                        <div class="flex space-x-2 mt-2">
+                            <a href="edit_todo.php?id=<?php echo $item['id']; ?>" 
+                               class="text-blue-400 hover:text-blue-600">
+                               <span class="bg-dark p-1 text-[xs] rounded-lg text-white material-symbols-outlined">
+                                    edit
+                                </span>
+                            </a>
+                            <a href="delete_todo.php?id=<?php echo $item['id']; ?>" 
+                               class="text-red-400 hover:text-red-600"
+                               onclick="return confirm('Are you sure you want to delete this item?');">
+                               <span class="bg-dark p-1 text-[xs] rounded-lg text-white material-symbols-outlined">
+                                    delete
+                                </span>
+                            </a>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+                <a href="new_todo.php?status=progress" 
+                   class="block mt-2 text-gray-400 hover:text-white p-2 rounded hover:bg-gray-700 transition">
+                    + Add To Do
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Done Column -->
+    <div class="flex-shrink-0 w-72">
+        <div class="bg-gray-800 rounded-md shadow">
+            <div class="p-3">
+                <h3 class="text-white font-semibold mb-2">Done</h3>
+                <?php foreach ($done as $item): ?>
+                    <div class="<?php echo getPriorityColor($item['priority']); ?> rounded mb-2 p-2 hover:opacity-90 cursor-pointer">
+                        <p class="text-white font-bold text-sm"><?php echo htmlspecialchars($item['title']); 
+                            $current_date = date('Y-m-d');
+                        ?></p>
+
+    <!-- Menampilkan due date jika ada -->
+    <p class="text-white font-bold text-xs">
+    Due: <?php echo isset($item['due_date']) ? htmlspecialchars($item['due_date']) : 'N/A'; ?>
+    </p>
+    <?php if (isset($item['due_date']) && $item['due_date'] < $current_date): ?>
+        <p class="text-red-500 text-xs font-bold">⚠️Due date has passed!!!⚠️</p>
+    <?php endif; ?>
+                        <span class="inline-block text-xs text-white px-2 py-1 rounded mt-1 <?php echo getPriorityBadgeColor($item['priority']); ?>">
+                            <?php echo ucfirst(strtolower(trim($item['priority'] ?? 'low'))); ?>
+                        </span>
+                        <div class="flex space-x-2 mt-2">
+                            <a href="edit_todo.php?id=<?php echo $item['id']; ?>" 
+                               class="text-blue-400 hover:text-blue-600">
+                               <span class="bg-dark p-1 text-[xs] rounded-lg text-white material-symbols-outlined">
+                                    edit
+                                </span>
+                            </a>
+                            <a href="delete_todo.php?id=<?php echo $item['id']; ?>" 
+                               class="text-red-400 hover:text-red-600"
+                               onclick="return confirm('Are you sure you want to delete this item?');">
+                               <span class="bg-dark p-1 text-[xs] rounded-lg text-white material-symbols-outlined">
+                                    delete
+                                </span>
+                            </a>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+                <a href="new_todo.php?status=done" 
+                   class="block mt-2 text-gray-400 hover:text-white p-2 rounded hover:bg-gray-700 transition">
+                    + Add To Do
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
     </div>
 </body>
 </html>

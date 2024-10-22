@@ -78,11 +78,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="">
                     <label for="due_date" class="block text-gray-300 mb-2">Due Date</label>
                     <input type="date" 
-                           id="due_date" 
-                           name="due_date" 
-                           class="w-full bg-gray-700 text-white rounded  p-2"
-                           onclick="showDatePicker()">
+                        id="due_date" 
+                        name="due_date" 
+                        class="w-full bg-gray-700 text-white rounded p-2"
+                        value="<?php echo isset($item['due_date']) ? htmlspecialchars($item['due_date']) : ''; ?>"  
+                        onclick="showDatePicker()">
                 </div>
+
 
                 <div>
                     <label for="status" class="block text-gray-300 mb-2">Status</label>

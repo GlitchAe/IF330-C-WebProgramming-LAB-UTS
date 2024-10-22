@@ -117,10 +117,6 @@ if (isset($_SESSION['success_message'])) {
                 <h1 class="text-white text-xs mb-2" for="password">Password</h1>
                 <input placeholder="password" class="bg-dark p-2 text-xs text-white flex h-8 w-full shadow-sm" type="password" name="password" id="password" required>
             </div>
-            <div class="flex flex-col items-start mb-4">
-                <h1 class="text-white text-xs mb-2" for="profile_image">Profile Image</h1>
-                <input class="bg-dark p-2 text-xs text-white flex h-8 w-full shadow-sm" type="file" name="profile_image" id="profile_image" accept="image/*">
-            </div>
 
             <button class="mb-2 bg-gradient rounded-full text-sm w-full font-bold px-6 py-1 text-white transition duration-400 ease-in-out hover:shadow-glowy" type="submit">Register</button>
         </form>
