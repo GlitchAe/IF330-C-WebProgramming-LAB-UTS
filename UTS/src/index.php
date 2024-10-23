@@ -100,6 +100,19 @@ function getPriorityBadgeColor($priority) {
     <link href="./output.css" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     
+    <style>
+    .slide-in {
+        transform: translateY(-30px);
+        opacity: 0;
+        transition: transform 1s ease, opacity 1s ease;
+    }
+
+    .slide-in-active {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    </style>
+
 
 </head>
 <body class="bg-dark min-h-screen">
@@ -150,7 +163,7 @@ function getPriorityBadgeColor($priority) {
 </script>
 
     <!-- Main Content -->
-    <div class="p-6">
+    <div class="p-6" >
         <?php if (isset($error_message)): ?>
             <div class="bg-red-500 text-white p-4 rounded mb-4">
                 <?php echo htmlspecialchars($error_message); ?>
@@ -167,8 +180,10 @@ function getPriorityBadgeColor($priority) {
             </div>
         </div>
 
+
+        
         <!-- List To Do -->
-<div class="flex space-x-4 overflow-x-auto pb-4">
+<div class="flex space-x-4 overflow-x-auto pb-4 slide-in rounded mb-2 p-2 hover:opacity-90 cursor-pointer">
     <!-- To Do Column -->
     <div class="flex-shrink-0 w-72">
         <div class="bg-gray-800 rounded-md shadow">
@@ -253,7 +268,7 @@ function getPriorityBadgeColor($priority) {
                         </div>
                     </div>
                 <?php endforeach; ?>
-                <a href="new_todo.php?status=progress" 
+                <a href="new_todo.php?status=in_progress" 
                    class="block mt-2 text-gray-400 hover:text-white p-2 rounded hover:bg-gray-700 transition">
                     + Add To Do
                 </a>
@@ -311,3 +326,15 @@ function getPriorityBadgeColor($priority) {
     </div>
 </body>
 </html>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const todoItems = document.querySelectorAll('.slide-in'); // Ambil semua elemen dengan kelas slide-in
+        // Tambahkan kelas slide-in-active ke setiap elemen secara bertahap
+        todoItems.forEach((item, index) => {
+            setTimeout(() => {
+                item.classList.add('slide-in-active');
+            }, index * 100); // Memberikan jeda waktu antara tiap item agar terlihat bertahap
+        });
+    });
+</script>

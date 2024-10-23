@@ -56,10 +56,23 @@ $user = $stmt->fetch();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Profile</title>
     <link href="./output.css" rel="stylesheet">
+
+    <style>
+    .slide-in {
+        transform: translateY(-30px);
+        opacity: 0;
+        transition: transform 1s ease, opacity 1s ease;
+    }
+
+    .slide-in-active {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    </style>
 </head>
 <body class="bg-dark text-center">
 
-    <div class="max-w-xl mx-auto p-6 bg-light-10 shadow-lg rounded-lg mt-10">
+    <div class="max-w-xl mx-auto p-6 bg-light-10 shadow-lg rounded-lg mt-10 slide-in">
         <h2 class="text-3xl font-bold text-white mb-6">Edit Your Profile</h2>
         
         <form method="POST" action="" enctype="multipart/form-data" class="space-y-4">
@@ -85,3 +98,15 @@ $user = $stmt->fetch();
 
 </body>
 </html>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const todoItems = document.querySelectorAll('.slide-in'); // Ambil semua elemen dengan kelas slide-in
+        // Tambahkan kelas slide-in-active ke setiap elemen secara bertahap
+        todoItems.forEach((item, index) => {
+            setTimeout(() => {
+                item.classList.add('slide-in-active');
+            }, index * 100); // Memberikan jeda waktu antara tiap item agar terlihat bertahap
+        });
+    });
+</script>

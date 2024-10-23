@@ -40,6 +40,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     input[type="date"]::-moz-focus-inner {
         border: 0;
     }
+    .slide-in {
+        transform: translateY(-30px);
+        opacity: 0;
+        transition: transform 1s ease, opacity 1s ease;
+    }
+
+    .slide-in-active {
+        transform: translateY(0);
+        opacity: 1;
+    }
 </style>
 <script>
         // JavaScript to force the date picker to open on input click
@@ -50,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </head>
 <body class="bg-dark min-h-screen">
     <div class="container mx-auto px-4 py-8">
-        <div class="max-w-md mx-auto bg-gray-800 rounded-lg shadow-lg p-6">
+        <div class="max-w-md mx-auto bg-gray-800 rounded-lg shadow-lg p-6 slide-in">
             <h2 class="text-2xl text-white font-bold mb-6">Create New Todo</h2>
             
             <form method="POST" action="" class="space-y-4">
@@ -111,3 +121,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     </div>
 </body>
 </html>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const todoItems = document.querySelectorAll('.slide-in'); // Ambil semua elemen dengan kelas slide-in
+        // Tambahkan kelas slide-in-active ke setiap elemen secara bertahap
+        todoItems.forEach((item, index) => {
+            setTimeout(() => {
+                item.classList.add('slide-in-active');
+            }, index * 100); // Memberikan jeda waktu antara tiap item agar terlihat bertahap
+        });
+    });
+</script>
